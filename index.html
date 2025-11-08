@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --background: hsl(0, 0%, 98%);
@@ -110,10 +111,10 @@
         .step-label { font-size: 0.75rem; color: var(--muted-foreground); }
         .device-card { cursor: pointer; transition: all 0.2s; }
         .device-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .icon { width: 1.5rem; height: 1.5rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-sm { width: 1rem; height: 1rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-lg { width: 2rem; height: 2rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-        .icon-xl { width: 4rem; height: 4rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon { width: 1.5rem; height: 1.5rem; stroke: currentColor; fill: none; stroke-width: 2; }
+        .icon-sm { width: 1rem; height: 1rem; }
+        .icon-lg { width: 2rem; height: 2rem; }
+        .icon-xl { width: 4rem; height: 4rem; }
         .bg-primary-light { background: rgba(30, 64, 175, 0.1); }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.2); } }
@@ -199,7 +200,7 @@
                 <p class="text-muted mb-6" id="app-description">-</p>
             </div>
             <div id="app-links" class="flex flex-col gap-3 mb-6"></div>
-            <button id="next-button-step2" class="btn btn-primary btn-full" onclick="handleInstallationComplete()">
+            <button id="next-button-step2" class="btn btn-primary btn-full" onclick="handleInstallationComplete()" data-testid="button-app-installed">
                 Далее
                 <svg class="icon-sm" style="margin-left:0.5rem" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
@@ -219,7 +220,7 @@
                 <p class="text-muted mb-6" id="subscription-description">-</p>
             </div>
             <div id="subscription-content"></div>
-            <button class="btn btn-primary btn-full mt-6" onclick="handleSubscriptionComplete()">
+            <button class="btn btn-primary btn-full mt-6" onclick="handleSubscriptionComplete()" data-testid="button-subscription-added">
                 Далее
                 <svg class="icon-sm" style="margin-left:0.5rem" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
@@ -227,68 +228,122 @@
 
         <div id="step-4" class="step-content hidden">
             <div class="text-center">
-                <div class="flex justify-center mb-6">
-                    <div class="bg-primary-light p-6 rounded-full">
-                        <svg class="icon-xl text-primary" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div class="flex justify-center mb-4">
+                    <div style="width: 5rem; height: 5rem; background: rgba(34, 197, 94, 0.1); border-radius: 9999px; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 3rem; height: 3rem; color: rgb(34, 197, 94);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                 </div>
-                <h2 class="text-2xl font-semibold mb-2">VPN готов к использованию!</h2>
-                <p class="text-muted mb-6">Теперь вы можете активировать VPN в приложении</p>
+                <h2 class="text-2xl font-semibold mb-2">VPN готов к использованию</h2>
+                <p class="text-muted mb-6">Нажмите на круглую синюю кнопку в приложении V2Raytun для включения VPN</p>
             </div>
-            <div class="card mb-6">
-                <h3 class="font-semibold mb-3">Как активировать VPN:</h3>
-                <ol style="list-style: decimal; padding-left: 1.5rem;">
-                    <li class="mb-2">Откройте установленное приложение V2RayTun</li>
-                    <li class="mb-2">Найдите добавленную подписку в списке</li>
-                    <li class="mb-2">Нажмите кнопку "Подключить" или переключатель</li>
-                    <li>Дождитесь успешного подключения (зеленый индикатор)</li>
-                </ol>
-            </div>
-            <div class="card mb-6" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">
-                <div class="flex gap-3">
-                    <svg class="icon text-primary" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <div>
-                        <h4 class="font-semibold mb-1">⚠️ Пользуйтесь VPN правильно</h4>
-                        <p class="text-sm">Не делитесь своей подпиской с другими. Используйте VPN только на указанном количестве устройств.</p>
+            
+            <div class="card p-6 mb-6">
+                <h3 class="font-semibold mb-4">⚠️ Пользуйтесь VPN правильно</h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(30, 64, 175, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.125rem;">⚡</div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-1">Основной</h4>
+                            <p class="text-sm text-muted">Он работает очень быстро и без перебоев, рекомендуем использовать этот сервер на WiFi и в регионах без блокировки мобильного интернета</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(30, 64, 175, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.125rem;">📶</div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-1">Антизаглушка МТС</h4>
+                            <p class="text-sm text-muted">Он работает очень медленно, но обходит заглушку мобильного интернета, используйте этот сервер только при необходимости и при возможности переключайтесь на Основной сервер</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <button class="btn btn-outline btn-full" onclick="restartWizard()">
-                Настроить другое устройство
-            </button>
+
+            <div class="card p-6 mb-6">
+                <div class="flex gap-4 items-start">
+                    <div class="flex-shrink-0">
+                        <div style="width: 3rem; height: 3rem; border-radius: 9999px; background: rgba(30, 64, 175, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                            <svg style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold mb-2">ВПН не работает?</h3>
+                        <p class="text-sm text-muted mb-4">Напишите в поддержку — мы ответим в течение 2 минут и поможем с установкой.</p>
+                        <button class="btn btn-primary" data-testid="button-contact-support">
+                            <svg class="icon-sm" style="margin-right:0.5rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                            Обратиться в поддержку
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center" style="padding-top: 1rem;">
+                <button class="btn btn-outline" onclick="restartWizard()" data-testid="button-add-device">
+                    Добавить ещё одно устройство
+                </button>
+            </div>
         </div>
 
         <div id="step-5" class="step-content hidden">
             <div class="text-center">
-                <div class="flex justify-center mb-6">
-                    <div class="bg-primary-light p-6 rounded-full">
-                        <svg class="icon-xl text-primary" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div class="flex justify-center mb-4">
+                    <div style="width: 5rem; height: 5rem; background: rgba(34, 197, 94, 0.1); border-radius: 9999px; display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 3rem; height: 3rem; color: rgb(34, 197, 94);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                     </div>
                 </div>
-                <h2 class="text-2xl font-semibold mb-2">VPN готов к использованию!</h2>
-                <p class="text-muted mb-6">Теперь вы можете активировать VPN в приложении</p>
+                <h2 class="text-2xl font-semibold mb-2">VPN готов к использованию</h2>
+                <p class="text-muted mb-6">Нажмите на круглую синюю кнопку в приложении V2Raytun для включения VPN</p>
             </div>
-            <div class="card mb-6">
-                <h3 class="font-semibold mb-3">Как активировать VPN:</h3>
-                <ol style="list-style: decimal; padding-left: 1.5rem;">
-                    <li class="mb-2">Откройте установленное приложение V2RayTun</li>
-                    <li class="mb-2">Найдите добавленную подписку в списке</li>
-                    <li class="mb-2">Нажмите кнопку "Подключить" или переключатель</li>
-                    <li>Дождитесь успешного подключения (зеленый индикатор)</li>
-                </ol>
-            </div>
-            <div class="card mb-6" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">
-                <div class="flex gap-3">
-                    <svg class="icon text-primary" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    <div>
-                        <h4 class="font-semibold mb-1">⚠️ Пользуйтесь VPN правильно</h4>
-                        <p class="text-sm">Не делитесь своей подпиской с другими. Используйте VPN только на указанном количестве устройств.</p>
+            
+            <div class="card p-6 mb-6">
+                <h3 class="font-semibold mb-4">⚠️ Пользуйтесь VPN правильно</h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(30, 64, 175, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.125rem;">⚡</div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-1">Основной</h4>
+                            <p class="text-sm text-muted">Он работает очень быстро и без перебоев, рекомендуем использовать этот сервер на WiFi и в регионах без блокировки мобильного интернета</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex-shrink-0">
+                            <div style="width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(30, 64, 175, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.125rem;">📶</div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-1">Антизаглушка МТС</h4>
+                            <p class="text-sm text-muted">Он работает очень медленно, но обходит заглушку мобильного интернета, используйте этот сервер только при необходимости и при возможности переключайтесь на Основной сервер</p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <button class="btn btn-outline btn-full" onclick="restartWizard()">
-                Настроить другое устройство
-            </button>
+
+            <div class="card p-6 mb-6">
+                <div class="flex gap-4 items-start">
+                    <div class="flex-shrink-0">
+                        <div style="width: 3rem; height: 3rem; border-radius: 9999px; background: rgba(30, 64, 175, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center;">
+                            <svg style="width: 1.5rem; height: 1.5rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-semibold mb-2">ВПН не работает?</h3>
+                        <p class="text-sm text-muted mb-4">Напишите в поддержку — мы ответим в течение 2 минут и поможем с установкой.</p>
+                        <button class="btn btn-primary" data-testid="button-contact-support">
+                            <svg class="icon-sm" style="margin-right:0.5rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="4.93" y1="4.93" x2="9.17" y2="9.17"/><line x1="14.83" y1="14.83" x2="19.07" y2="19.07"/><line x1="14.83" y1="9.17" x2="19.07" y2="4.93"/><line x1="14.83" y1="9.17" x2="18.36" y2="5.64"/><line x1="4.93" y1="19.07" x2="9.17" y2="14.83"/></svg>
+                            Обратиться в поддержку
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-center" style="padding-top: 1rem;">
+                <button class="btn btn-outline" onclick="restartWizard()" data-testid="button-add-device">
+                    Добавить ещё одно устройство
+                </button>
+            </div>
         </div>
     </div>
 
@@ -303,8 +358,7 @@
                 </div>
             </div>
             <div style="padding-top: 1rem; margin-bottom: 1.5rem;">
-                <p style="margin-bottom: 1rem;">Вы собираетесь перейти по внешней ссылке для загрузки приложения.</p>
-                <p style="font-weight: 500;">Убедитесь, что вы доверяете источнику загрузки.</p>
+                <p style="font-weight: 500;">После установки не забудьте вернуться обратно на этот экран для завершения установки, иначе VPN не будет работать.</p>
             </div>
             <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                 <button class="btn btn-outline" onclick="hideDownloadDialog()" style="flex: 1;">Отмена</button>
@@ -315,11 +369,11 @@
 
     <script>
         const devices = [
-            { id: 'ios', name: 'iPhone / iPad', description: 'iOS устройства', icon: '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>' },
-            { id: 'android', name: 'Android', description: 'Android телефоны и планшеты', icon: '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>' },
-            { id: 'windows', name: 'Windows', description: 'Компьютеры на Windows', icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>' },
-            { id: 'macos', name: 'macOS', description: 'Компьютеры Mac', icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>' },
-            { id: 'tv', name: 'Android TV', description: 'Телевизионная приставка', icon: '<rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline>' }
+            { id: 'ios', name: 'iPhone / iPad', description: 'iOS устройства', icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z' },
+            { id: 'android', name: 'Android', description: 'Android телефоны и планшеты', icon: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' },
+            { id: 'windows', name: 'Windows', description: 'Компьютеры на Windows', icon: 'M4 3h7v7H4zm0 11h7v7H4zm11-11h7v7h-7zm0 11h7v7h-7z' },
+            { id: 'macos', name: 'macOS', description: 'Компьютеры Mac', icon: 'M12 2l10 9-2 3H4l-2-3z' },
+            { id: 'tv', name: 'Android TV', description: 'Телевизионная приставка', icon: 'M7 2h10l5 9v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9l5-9zm0 0 5 9m0 0 5-9m-5 9v9' }
         ];
         
         const appInfo = {
@@ -347,7 +401,7 @@
                     'Нажмите <b>"Установить"</b> и дождитесь завершения установки.',
                     'Запустите приложение после установки.'
                 ],
-                icon: '<rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline>'
+                icon: '<path d="M20 7h-5V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11h20V9c0-1.1-.9-2-2-2z"/>'
             }
         };
 
@@ -379,7 +433,7 @@
                 <div class="card device-card" onclick="selectDevice('${d.id}')">
                     <div class="flex items-start gap-4">
                         <div class="p-3 bg-primary-light rounded-lg">
-                            <svg class="icon-lg text-primary" viewBox="0 0 24 24">${d.icon}</svg>
+                            <svg class="icon-lg text-primary" viewBox="0 0 24 24"><path d="${d.icon}"/></svg>
                         </div>
                         <div class="flex-1">
                             <h3 class="font-semibold text-lg mb-1">${d.name}</h3>
@@ -444,6 +498,7 @@
                 nextBtn.className = 'btn btn-outline';
                 nextBtn.style.width = '100%';
                 nextBtn.onclick = handleInstallationComplete;
+                nextBtn.setAttribute('data-testid', 'button-app-installed');
                 nextBtn.innerHTML = `
                     Далее
                     <svg class="icon-sm" style="margin-left:0.375rem" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -514,6 +569,10 @@
             document.getElementById(`step-${step}`).classList.remove('hidden');
             initProgress();
             
+            if (step === 4 || step === 5) {
+                triggerConfetti();
+            }
+            
             if (step === 3 || (step === 4 && selectedPlatform === 'tv')) {
                 const isMobile = ['ios', 'android', 'macos'].includes(selectedPlatform);
                 const showQRCode = false;
@@ -533,11 +592,13 @@
                     addBtn.className = 'btn btn-primary';
                     addBtn.style.flex = '1';
                     addBtn.setAttribute('href', 'v2raytun://import/' + encodeURIComponent(subscriptionUrl));
+                    addBtn.setAttribute('data-testid', 'button-add-subscription');
                     addBtn.innerHTML = '<svg class="icon-sm" style="margin-right:0.25rem" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить<svg class="icon-sm" style="margin-left:0.25rem" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
                     
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'btn btn-outline';
                     copyBtn.style.flex = '1';
+                    copyBtn.setAttribute('data-testid', 'button-copy');
                     copyBtn.innerHTML = '<svg class="icon-sm" style="margin-right:0.25rem" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать';
                     copyBtn.addEventListener('click', function() { copyToClipboard(subscriptionUrl, this); });
                     
@@ -590,6 +651,7 @@
                     
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'btn btn-outline';
+                    copyBtn.setAttribute('data-testid', 'button-copy');
                     copyBtn.innerHTML = '<svg class="icon-sm" style="margin-right:0.5rem" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку подписки';
                     copyBtn.addEventListener('click', function() { copyToClipboard(subscriptionUrl, this); });
                     copyBtnWrapper.appendChild(copyBtn);
@@ -727,6 +789,15 @@
         function copyToClipboard(text, button) {
             navigator.clipboard.writeText(text).then(() => {
                 showToast('Скопировано!', 'Ссылка подписки скопирована в буфер обмена');
+                
+                const originalHtml = button.innerHTML;
+                button.innerHTML = '<svg class="icon-sm" style="margin-right:0.5rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Скопировано';
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    button.innerHTML = originalHtml;
+                    button.disabled = false;
+                }, 2000);
             }).catch(() => {
                 showToast('Ошибка', 'Не удалось скопировать ссылку', 'error');
             });
@@ -751,6 +822,39 @@
             }
         }
 
+        function triggerConfetti() {
+            if (typeof confetti === 'undefined') return;
+            
+            const duration = 3000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                });
+                confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                });
+            }, 250);
+        }
+
         function restartWizard() {
             currentStep = 1;
             selectedPlatform = null;
@@ -771,10 +875,10 @@
         }
 
         function initStatus() {
-            const status = '{{ user.status }}';
-            const usedTraffic = {{ user.used_traffic or 0 }};
-            const dataLimit = {{ user.data_limit or 0 }};
-            const expire = {{ user.expire or 0 }};
+            const status = '{{ user.status.value }}';
+            const usedTraffic = {{ user.used_traffic }};
+            const dataLimit = {{ user.data_limit }};
+            const expire = {{ user.expire }};
             
             document.getElementById('traffic-display').textContent = `${formatTraffic(usedTraffic)} / ${formatTraffic(dataLimit)}`;
             document.getElementById('expiry-display').textContent = formatExpiry(expire);
@@ -787,12 +891,12 @@
         }
 
         window.onload = () => {
-            {% if user.status == 'active' %}
+            {% if user.status.value == 'active' %}
             initStatus();
             initProgress();
             initDevices();
             {% else %}
-            document.body.innerHTML = '<div class="container text-center" style="padding-top:4rem"><h1 class="text-2xl font-semibold mb-4">Подписка неактивна</h1><p class="text-muted">Статус: {{ user.status }}</p></div>';
+            document.body.innerHTML = '<div class="container text-center" style="padding-top:4rem"><h1 class="text-2xl font-semibold mb-4">Подписка неактивна</h1><p class="text-muted">Статус: {{ user.status.value }}</p></div>';
             {% endif %}
         };
     </script>
