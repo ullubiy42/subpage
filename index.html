@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка VPN - {{ user.username }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --background: hsl(0, 0%, 98%);
+            --foreground: hsl(0, 0%, 12%);
+            --card: hsl(0, 0%, 96%);
+            --card-foreground: hsl(0, 0%, 12%);
+            --card-border: hsl(0, 0%, 91%);
+            --border: hsl(0, 0%, 89%);
+            --primary: hsl(217, 91%, 42%);
+            --primary-foreground: hsl(0, 0%, 98%);
+            --primary-border: hsl(217, 91%, 34%);
+            --muted-foreground: hsl(0, 0%, 35%);
+            --accent: hsl(217, 12%, 88%);
+            --status-active-bg: rgba(34, 197, 94, 0.1);
+            --status-active-text: #15803d;
+            --status-active-border: rgba(34, 197, 94, 0.2);
+            --status-expired-bg: rgba(239, 68, 68, 0.1);
+            --status-expired-text: #b91c1c;
+            --status-expired-border: rgba(239, 68, 68, 0.2);
+            --status-limited-bg: rgba(234, 179, 8, 0.1);
+            --status-limited-text: #a16207;
+            --status-limited-border: rgba(234, 179, 8, 0.2);
+            --status-disabled-bg: rgba(107, 114, 128, 0.1);
+            --status-disabled-text: #4b5563;
+            --status-disabled-border: rgba(107, 114, 128, 0.2);
+            --status-onhold-bg: rgba(59, 130, 246, 0.1);
+            --status-onhold-text: #1d4ed8;
+            --status-onhold-border: rgba(59, 130, 246, 0.2);
+            --button-dark: hsl(0, 0%, 9%);
+            --button-dark-foreground: hsl(0, 0%, 98%);
+            --shadow-xs: 0px 1px 3px 0px rgba(0, 0, 0, 0.08);
+            --radius: 0.5rem;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: hsl(0, 0%, 8%);
+                --foreground: hsl(0, 0%, 95%);
+                --card: hsl(0, 0%, 11%);
+                --card-foreground: hsl(0, 0%, 95%);
+                --card-border: hsl(0, 0%, 16%);
+                --border: hsl(0, 0%, 18%);
+                --muted-foreground: hsl(0, 0%, 70%);
+                --accent: hsl(217, 8%, 19%);
+                --status-active-text: #4ade80;
+                --status-expired-text: #f87171;
+                --status-limited-text: #facc15;
+                --status-disabled-text: #9ca3af;
+                --status-onhold-text: #60a5fa;
+                --button-dark: hsl(0, 0%, 20%);
+                --button-dark-foreground: hsl(0, 0%, 98%);
+                --shadow-xs: 0px 1px 3px 0px rgba(0, 0, 0, 0.30);
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--background); color: var(--foreground); line-height: 1.5; }
+        .container { max-width: 48rem; margin: 0 auto; padding: 2rem 1rem; }
+        .card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-xs); }
+        .hidden { display: none !important; }
+        .grid { display: grid; gap: 1rem; }
+        .grid-2 { grid-template-columns: repeat(1, 1fr); }
+        @media (min-width: 768px) { .grid-2 { grid-template-columns: repeat(2, 1fr); } .grid-3 { grid-template-columns: repeat(3, 1fr); } }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-1 { gap: 0.25rem; } .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .gap-6 { gap: 1.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; } .mb-2 { margin-bottom: 0.5rem; } .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
+        .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; }
+        .p-2 { padding: 0.5rem; } .p-3 { padding: 0.75rem; } .p-4 { padding: 1rem; } .p-6 { padding: 1.5rem; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 0.875rem; } .text-xs { font-size: 0.75rem; } .text-lg { font-size: 1.125rem; } .text-xl { font-size: 1.25rem; } .text-2xl { font-size: 1.5rem; }
+        .font-semibold { font-weight: 600; } .font-medium { font-weight: 500; }
+        .text-muted { color: var(--muted-foreground); } .text-primary { color: var(--primary); }
+        .rounded-md { border-radius: var(--radius); } .rounded-lg { border-radius: calc(var(--radius) * 1.5); } .rounded-full { border-radius: 9999px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius); font-size: 0.875rem; font-weight: 500; padding: 0.5rem 1rem; min-height: 2.25rem; cursor: pointer; transition: all 0.2s; text-decoration: none; border: 1px solid transparent; }
+        .btn-primary { background: var(--primary); color: var(--primary-foreground); border-color: var(--primary-border); }
+        .btn-primary:hover { filter: brightness(1.1); }
+        .btn-dark { background: var(--button-dark); color: var(--button-dark-foreground); border-color: var(--button-dark); }
+        .btn-dark:hover { filter: brightness(1.2); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--foreground); }
+        .btn-outline:hover { background: var(--accent); }
+        .btn-ghost { background: transparent; border: none; }
+        .btn-ghost:hover { background: var(--accent); }
+        .btn-full { width: 100%; }
+        .badge { display: inline-flex; align-items: center; border-radius: var(--radius); padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 600; border: 1px solid; }
+        .badge-active { background: var(--status-active-bg); color: var(--status-active-text); border-color: var(--status-active-border); }
+        .badge-expired { background: var(--status-expired-bg); color: var(--status-expired-text); border-color: var(--status-expired-border); }
+        .badge-limited { background: var(--status-limited-bg); color: var(--status-limited-text); border-color: var(--status-limited-border); }
+        .badge-disabled { background: var(--status-disabled-bg); color: var(--status-disabled-text); border-color: var(--status-disabled-border); }
+        .badge-on_hold { background: var(--status-onhold-bg); color: var(--status-onhold-text); border-color: var(--status-onhold-border); }
+        .progress-bar { display: flex; justify-content: space-between; margin-bottom: 2rem; }
+        .progress-step { flex: 1; text-align: center; position: relative; }
+        .progress-step:not(:last-child)::after { content: ''; position: absolute; top: 1rem; left: 50%; width: 100%; height: 2px; background: var(--border); z-index: -1; }
+        .progress-step.active .step-circle { background: var(--primary); color: var(--primary-foreground); }
+        .progress-step.completed .step-circle { background: var(--primary); color: var(--primary-foreground); }
+        .progress-step.completed::after { background: var(--primary); }
+        .step-circle { width: 2rem; height: 2rem; border-radius: 50%; background: var(--card); border: 2px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-weight: 600; margin-bottom: 0.5rem; }
+        .step-label { font-size: 0.75rem; color: var(--muted-foreground); }
+        .device-card { cursor: pointer; transition: all 0.2s; }
+        .device-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .icon { width: 1.5rem; height: 1.5rem; stroke: currentColor; fill: none; stroke-width: 2; }
+        .icon-sm { width: 1rem; height: 1rem; }
+        .icon-lg { width: 2rem; height: 2rem; }
+        .icon-xl { width: 4rem; height: 4rem; }
+        .bg-primary-light { background: rgba(30, 64, 175, 0.1); }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.2); } }
+        @keyframes rotate { 0% { transform: rotate(0deg); } 25% { transform: rotate(5deg); } 75% { transform: rotate(-5deg); } 100% { transform: rotate(0deg); } }
+        
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; max-width: 420px; }
+        .toast { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); display: flex; gap: 1rem; align-items: start; animation: slideIn 0.3s ease-out; position: relative; overflow: hidden; }
+        .toast.removing { animation: slideOut 0.3s ease-in forwards; }
+        .toast-success { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+        .toast-error { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+        .toast-icon { flex-shrink: 0; width: 1.25rem; height: 1.25rem; }
+        .toast-content { flex: 1; }
+        .toast-title { font-weight: 600; margin-bottom: 0.25rem; color: var(--foreground); }
+        .toast-description { font-size: 0.875rem; color: var(--muted-foreground); }
+        .toast-timer { position: absolute; bottom: 0; left: 0; height: 3px; background: currentColor; width: 100%; transform-origin: left; animation: timerProgress 5s linear forwards; }
+        .toast-success .toast-timer { color: rgb(34, 197, 94); }
+        .toast-error .toast-timer { color: rgb(239, 68, 68); }
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+        @keyframes timerProgress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+        .animate-float { animation: float 2s ease-in-out infinite; }
+        .animate-pulse-glow { position: absolute; inset: 0; background: var(--primary); opacity: 0.2; border-radius: 50%; filter: blur(20px); animation: pulse 2s ease-in-out infinite; }
+        .animate-rotate { animation: rotate 3s ease-in-out infinite; }
+        #qrcode { display: flex; justify-content: center; padding: 1rem; background: white; border-radius: var(--radius); }
+        #qrcode canvas { border-radius: var(--radius); }
+    </style>
+</head>
+<body data-subscription-url="{% for link in user.links %}{{ link }}{% break %}{% endfor %}">
+    <div class="container">
+        <div id="status-card" class="card mb-6 hidden">
+            <div class="grid grid-3 gap-6">
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-primary-light rounded-md">
+                        <svg class="icon text-primary" viewBox="0 0 24 24"><path d="M6 20h12M6 20c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2M6 20V4m12 16V4M10 8h4M10 12h4M10 16h4"/></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-sm text-muted mb-1">Трафик</div>
+                        <div class="font-semibold" id="traffic-display">-</div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-primary-light rounded-md">
+                        <svg class="icon text-primary" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm text-muted mb-1">Остаток дней</div>
+                        <div class="font-semibold" id="expiry-display">-</div>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="p-2 bg-primary-light rounded-md">
+                        <svg class="icon text-primary" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div>
+                        <div class="text-sm text-muted mb-1">Статус подписки</div>
+                        <span id="status-badge" class="badge">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progress-bar"></div>
+
+        <div id="step-1" class="step-content">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-semibold mb-2">Выберите ваше устройство</h2>
+                <p class="text-muted">Нажмите на ваш тип устройства ниже👇</p>
+            </div>
+            <div class="grid grid-2 gap-4" id="device-grid"></div>
+        </div>
+
+        <div id="step-2" class="step-content hidden">
+            <div class="text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="animate-float" style="position: relative;">
+                        <div class="animate-pulse-glow"></div>
+                        <div class="bg-primary-light p-6 rounded-full animate-rotate" style="position: relative;">
+                            <svg class="icon-xl text-primary" id="app-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-semibold mb-2" id="app-title">Установите приложение</h2>
+                <p class="text-muted mb-6" id="app-description">-</p>
+            </div>
+            <div id="app-links" class="flex flex-col gap-3 mb-6"></div>
+            <button id="next-button-step2" class="btn btn-primary btn-full" onclick="handleInstallationComplete()">
+                Далее
+                <svg class="icon-sm" style="margin-left:0.5rem" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </div>
+
+        <div id="step-3" class="step-content hidden">
+            <div class="text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="animate-float" style="position: relative;">
+                        <div class="animate-pulse-glow"></div>
+                        <div class="bg-primary-light p-6 rounded-full animate-rotate" style="position: relative;">
+                            <svg class="icon-xl text-primary" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-semibold mb-2">Добавьте подписку в приложение</h2>
+                <p class="text-muted mb-6" id="subscription-description">-</p>
+            </div>
+            <div id="subscription-content"></div>
+            <button class="btn btn-primary btn-full mt-6" onclick="handleSubscriptionComplete()">
+                Далее
+                <svg class="icon-sm" style="margin-left:0.5rem" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+        </div>
+
+        <div id="step-4" class="step-content hidden">
+            <div class="text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="bg-primary-light p-6 rounded-full">
+                        <svg class="icon-xl text-primary" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-semibold mb-2">VPN готов к использованию!</h2>
+                <p class="text-muted mb-6">Теперь вы можете активировать VPN в приложении</p>
+            </div>
+            <div class="card mb-6">
+                <h3 class="font-semibold mb-3">Как активировать VPN:</h3>
+                <ol style="list-style: decimal; padding-left: 1.5rem;">
+                    <li class="mb-2">Откройте установленное приложение V2RayTun</li>
+                    <li class="mb-2">Найдите добавленную подписку в списке</li>
+                    <li class="mb-2">Нажмите кнопку "Подключить" или переключатель</li>
+                    <li>Дождитесь успешного подключения (зеленый индикатор)</li>
+                </ol>
+            </div>
+            <div class="card mb-6" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">
+                <div class="flex gap-3">
+                    <svg class="icon text-primary" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <div>
+                        <h4 class="font-semibold mb-1">⚠️ Пользуйтесь VPN правильно</h4>
+                        <p class="text-sm">Не делитесь своей подпиской с другими. Используйте VPN только на указанном количестве устройств.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline btn-full" onclick="restartWizard()">
+                Настроить другое устройство
+            </button>
+        </div>
+
+        <div id="step-5" class="step-content hidden">
+            <div class="text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="bg-primary-light p-6 rounded-full">
+                        <svg class="icon-xl text-primary" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                </div>
+                <h2 class="text-2xl font-semibold mb-2">VPN готов к использованию!</h2>
+                <p class="text-muted mb-6">Теперь вы можете активировать VPN в приложении</p>
+            </div>
+            <div class="card mb-6">
+                <h3 class="font-semibold mb-3">Как активировать VPN:</h3>
+                <ol style="list-style: decimal; padding-left: 1.5rem;">
+                    <li class="mb-2">Откройте установленное приложение V2RayTun</li>
+                    <li class="mb-2">Найдите добавленную подписку в списке</li>
+                    <li class="mb-2">Нажмите кнопку "Подключить" или переключатель</li>
+                    <li>Дождитесь успешного подключения (зеленый индикатор)</li>
+                </ol>
+            </div>
+            <div class="card mb-6" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2);">
+                <div class="flex gap-3">
+                    <svg class="icon text-primary" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <div>
+                        <h4 class="font-semibold mb-1">⚠️ Пользуйтесь VPN правильно</h4>
+                        <p class="text-sm">Не делитесь своей подпиской с другими. Используйте VPN только на указанном количестве устройств.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-outline btn-full" onclick="restartWizard()">
+                Настроить другое устройство
+            </button>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toast-container"></div>
+
+    <div id="download-dialog" class="hidden" style="position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center;" data-testid="download-dialog">
+        <div class="card" style="max-width: 28rem; width: 100%; margin: 1rem;">
+            <div style="margin-bottom: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <svg class="icon text-primary" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <h3 class="font-semibold" style="margin: 0;">Важная информация</h3>
+                </div>
+            </div>
+            <div style="padding-top: 1rem; margin-bottom: 1.5rem;">
+                <p style="margin-bottom: 1rem;">Вы собираетесь перейти по внешней ссылке для загрузки приложения.</p>
+                <p style="font-weight: 500;">Убедитесь, что вы доверяете источнику загрузки.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button class="btn btn-outline" onclick="hideDownloadDialog()" style="flex: 1;">Отмена</button>
+                <button class="btn btn-primary" onclick="confirmDownload()" style="flex: 1;" data-testid="button-download-now">Хорошо, скачать приложение</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const devices = [
+            { id: 'ios', name: 'iPhone / iPad', description: 'iOS устройства', icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z' },
+            { id: 'android', name: 'Android', description: 'Android телефоны и планшеты', icon: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' },
+            { id: 'windows', name: 'Windows', description: 'Компьютеры на Windows', icon: 'M4 3h7v7H4zm0 11h7v7H4zm11-11h7v7h-7zm0 11h7v7h-7z' },
+            { id: 'macos', name: 'macOS', description: 'Компьютеры Mac', icon: 'M12 2l10 9-2 3H4l-2-3z' },
+            { id: 'tv', name: 'Android TV', description: 'Телевизионная приставка', icon: 'M7 2h10l5 9v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9l5-9zm0 0 5 9m0 0 5-9m-5 9v9' }
+        ];
+        
+        const appInfo = {
+            ios: { appName: 'V2RayTun', description: 'Установите приложение V2Raytun, вернитесь к этому экрану и нажмите "Далее"👇', links: [{label: 'Скачать из App Store', url: 'https://apps.apple.com/ru/app/v2raytun/id6476628951?l=en-GB'}] },
+            android: { appName: 'V2RayTun', description: 'Установите приложение V2Raytun, вернитесь к этому экрану и нажмите "Далее"👇', links: [{label: 'Скачать из Google Play', url: 'https://play.google.com/store/apps/details?id=com.v2raytun.android&hl=ru'}] },
+            windows: { appName: 'V2RayTun', description: 'Установите приложение V2Raytun на Windows, вернитесь к этому экрану и нажмите "Далее"👇', links: [{label: 'Скачать для Windows', url: 'https://storage.fcknrockn.net/v2RayTun_Setup.exe'}] },
+            macos: { appName: 'V2RayTun', description: 'Установите приложение V2Raytun, вернитесь к этому экрану и нажмите "Далее"👇', links: [{label: 'Скачать для macOS', url: 'https://apps.apple.com/ru/app/v2raytun/id6476628951?l=en-GB'}] },
+            tv: { appName: 'V2RayTun', description: 'Установите на смартфон приложение-пульт для управления телевизором, подключите его к телевизору, вернитесь к этому экрану и нажмите "Далее"👇', links: [{label: 'Скачать из Google Play', url: 'https://play.google.com/store/apps/details?id=com.v2raytun.android&hl=ru', style: 'primary'}, {label: 'Скачать из AppStore', url: 'https://apps.apple.com/ru/app/v2raytun/id6476628951?l=en-GB', style: 'dark'}] }
+        };
+
+        const tvStepInfo = {
+            remote: {
+                title: 'Скачайте приложение пульт на телефон',
+                description: 'Установите на смартфон приложение-пульт для управления телевизором, подключите его к телевизору, вернитесь к этому экрану и нажмите "Далее"👇',
+                links: [{label: 'Скачать из Google Play', url: 'https://play.google.com/store/apps/details?id=tech.simha.androidtvremote&hl=en_US', style: 'primary'}, {label: 'Скачать из AppStore', url: 'https://apps.apple.com/ru/app/remote-for-android-tv/id1668755298', style: 'dark'}],
+                icon: '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>'
+            },
+            app: {
+                title: 'Скачайте приложение',
+                description: 'Установите приложение V2Raytun на Android TV следуя инструкции ниже, вернитесь к этому экрану и нажмите "Далее"👇',
+                links: [],
+                instructions: [
+                    'Откройте <b>Google Play Store</b> на вашем телевизоре.',
+                    'Найдите приложение <b>V2RayTun</b> в поиске.',
+                    'Нажмите <b>"Установить"</b> и дождитесь завершения установки.',
+                    'Запустите приложение после установки.'
+                ],
+                icon: '<path d="M20 7h-5V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11h20V9c0-1.1-.9-2-2-2z"/>'
+            }
+        };
+
+        let currentStep = 1;
+        let selectedPlatform = null;
+        let tvCurrentSubStep = 'remote';
+        const subscriptionUrl = document.body.dataset.subscriptionUrl || '';
+
+        function getSteps() {
+            return selectedPlatform === 'tv' 
+                ? ['Выбор устройства', 'Установка пульта', 'Установка приложения', 'Добавление подписки', 'Готово']
+                : ['Выбор устройства', 'Установка приложения', 'Добавление подписки', 'Готово'];
+        }
+
+        function initProgress() {
+            const steps = getSteps();
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.innerHTML = steps.map((label, i) => `
+                <div class="progress-step ${i + 1 === currentStep ? 'active' : ''} ${i + 1 < currentStep ? 'completed' : ''}">
+                    <div class="step-circle">${i + 1}</div>
+                    <div class="step-label">${label}</div>
+                </div>
+            `).join('');
+        }
+
+        function initDevices() {
+            const grid = document.getElementById('device-grid');
+            grid.innerHTML = devices.map(d => `
+                <div class="card device-card" onclick="selectDevice('${d.id}')">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-primary-light rounded-lg">
+                            <svg class="icon-lg text-primary" viewBox="0 0 24 24"><path d="${d.icon}"/></svg>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold text-lg mb-1">${d.name}</h3>
+                            <p class="text-sm text-muted">${d.description}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectDevice(deviceId) {
+            selectedPlatform = deviceId;
+            tvCurrentSubStep = 'remote';
+            updateInstallationStep();
+            goToStep(2);
+        }
+
+        function updateInstallationStep() {
+            const isTV = selectedPlatform === 'tv';
+            const stepInfo = isTV ? tvStepInfo[tvCurrentSubStep] : appInfo[selectedPlatform];
+            
+            const titleText = isTV ? stepInfo.title : `Установите ${stepInfo.appName}`;
+            document.getElementById('app-title').textContent = titleText;
+            document.getElementById('app-description').textContent = stepInfo.description;
+            
+            const appIcon = document.getElementById('app-icon');
+            appIcon.innerHTML = stepInfo.icon || '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>';
+            
+            const container = document.getElementById('app-links');
+            container.innerHTML = '';
+            const nextButton = document.getElementById('next-button-step2');
+            
+            const isMobileLayout = ['ios', 'android', 'macos', 'windows'].includes(selectedPlatform) || (isTV && tvCurrentSubStep === 'remote');
+            
+            if (isMobileLayout && stepInfo.links && stepInfo.links.length > 0) {
+                nextButton.style.display = 'none';
+                container.className = 'flex flex-col md:flex-row gap-2 justify-center px-4 mb-6';
+                container.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem; justify-content: center; padding-left: 1rem; padding-right: 1rem; margin-bottom: 1.5rem;';
+                
+                stepInfo.links.forEach(link => {
+                    const btnWrapper = document.createElement('div');
+                    btnWrapper.style.minWidth = '0';
+                    
+                    const btn = document.createElement('button');
+                    const btnStyle = link.style === 'dark' ? 'btn-dark' : 'btn-primary';
+                    btn.className = `btn ${btnStyle}`;
+                    btn.style.width = '100%';
+                    btn.onclick = () => showDownloadDialog(link.url);
+                    btn.innerHTML = `
+                        <svg class="icon-sm" style="margin-right:0.375rem" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        ${link.label}
+                        <svg class="icon-sm" style="margin-left:0.375rem" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    `;
+                    btnWrapper.appendChild(btn);
+                    container.appendChild(btnWrapper);
+                });
+                
+                const nextBtnWrapper = document.createElement('div');
+                nextBtnWrapper.style.minWidth = '0';
+                
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'btn btn-outline';
+                nextBtn.style.width = '100%';
+                nextBtn.onclick = handleInstallationComplete;
+                nextBtn.innerHTML = `
+                    Далее
+                    <svg class="icon-sm" style="margin-left:0.375rem" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                `;
+                nextBtnWrapper.appendChild(nextBtn);
+                container.appendChild(nextBtnWrapper);
+                
+            } else if (!isMobileLayout && stepInfo.instructions && stepInfo.instructions.length > 0) {
+                nextButton.style.display = 'block';
+                container.className = 'flex flex-col gap-3 mb-6';
+                const card = document.createElement('div');
+                card.className = 'card p-6 mb-6';
+                
+                const instructionsTitle = document.createElement('h3');
+                instructionsTitle.className = 'font-semibold mb-3';
+                instructionsTitle.textContent = 'Инструкция по установке';
+                card.appendChild(instructionsTitle);
+                
+                const instructionsList = document.createElement('div');
+                instructionsList.className = 'flex flex-col gap-3';
+                
+                stepInfo.instructions.forEach((instruction, index) => {
+                    const instructionDiv = document.createElement('div');
+                    instructionDiv.className = 'flex gap-3';
+                    
+                    const numberDiv = document.createElement('div');
+                    numberDiv.className = 'flex-shrink-0';
+                    numberDiv.innerHTML = `
+                        <div class="bg-primary-light text-primary rounded-full" style="width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 500;">
+                            ${index + 1}
+                        </div>
+                    `;
+                    
+                    const textP = document.createElement('p');
+                    textP.className = 'text-sm';
+                    textP.style.paddingTop = '0.125rem';
+                    textP.innerHTML = instruction;
+                    
+                    instructionDiv.appendChild(numberDiv);
+                    instructionDiv.appendChild(textP);
+                    instructionsList.appendChild(instructionDiv);
+                });
+                
+                card.appendChild(instructionsList);
+                container.appendChild(card);
+            }
+        }
+
+        function handleInstallationComplete() {
+            const isTV = selectedPlatform === 'tv';
+            if (isTV && tvCurrentSubStep === 'remote') {
+                tvCurrentSubStep = 'app';
+                updateInstallationStep();
+                goToStep(3);
+            } else {
+                goToStep(isTV ? 4 : 3);
+            }
+        }
+
+        function handleSubscriptionComplete() {
+            const isTV = selectedPlatform === 'tv';
+            goToStep(isTV ? 5 : 4);
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+            initProgress();
+            
+            if (step === 3 || (step === 4 && selectedPlatform === 'tv')) {
+                const isMobile = ['ios', 'android', 'macos'].includes(selectedPlatform);
+                const showQRCode = false;
+                const desc = isMobile 
+                    ? 'Нажмите на кнопку "Добавить" ниже, после того как ваша подписка добавится в приложение вернитесь к этому экрану и нажмите "Далее"👇'
+                    : 'Следуйте инструкции ниже для добавления вашей VPN подписки, после того как ваша подписка добавится в приложение вернитесь к этому экрану и нажмите "Далее"👇';
+                document.getElementById('subscription-description').textContent = desc;
+                
+                const container = document.getElementById('subscription-content');
+                container.innerHTML = '';
+                
+                if (isMobile) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex flex-row gap-2 justify-center px-4';
+                    
+                    const addBtn = document.createElement('a');
+                    addBtn.className = 'btn btn-primary';
+                    addBtn.style.flex = '1';
+                    addBtn.setAttribute('href', 'v2raytun://import/' + encodeURIComponent(subscriptionUrl));
+                    addBtn.innerHTML = '<svg class="icon-sm" style="margin-right:0.25rem" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Добавить<svg class="icon-sm" style="margin-left:0.25rem" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn btn-outline';
+                    copyBtn.style.flex = '1';
+                    copyBtn.innerHTML = '<svg class="icon-sm" style="margin-right:0.25rem" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать';
+                    copyBtn.addEventListener('click', function() { copyToClipboard(subscriptionUrl, this); });
+                    
+                    wrapper.appendChild(addBtn);
+                    wrapper.appendChild(copyBtn);
+                    container.appendChild(wrapper);
+                } else {
+                    const card = document.createElement('div');
+                    card.className = 'card p-6 mb-6';
+                    
+                    if (showQRCode) {
+                        const qrTitle = document.createElement('h3');
+                        qrTitle.className = 'font-semibold mb-4 text-center';
+                        qrTitle.textContent = 'Отсканируйте QR-код';
+                        card.appendChild(qrTitle);
+                        
+                        const qrDiv = document.createElement('div');
+                        qrDiv.className = 'mb-6';
+                        qrDiv.id = 'qrcode';
+                        qrDiv.style.display = 'flex';
+                        qrDiv.style.justifyContent = 'center';
+                        card.appendChild(qrDiv);
+                        
+                        setTimeout(() => {
+                            qrDiv.innerHTML = '';
+                            new QRCode(qrDiv, {
+                                text: subscriptionUrl,
+                                width: 256,
+                                height: 256,
+                                correctLevel: QRCode.CorrectLevel.L
+                            });
+                        }, 100);
+                        
+                        const separator = document.createElement('div');
+                        separator.className = 'mb-6';
+                        separator.style.position = 'relative';
+                        separator.innerHTML = '<div style="position: absolute; inset: 0; display: flex; align-items: center;"><span style="width: 100%; border-top: 1px solid var(--border);"></span></div><div style="position: relative; display: flex; justify-content: center; font-size: 0.75rem; text-transform: uppercase;"><span style="background: var(--card); padding: 0 0.5rem; color: var(--muted-foreground);">Или</span></div>';
+                        card.appendChild(separator);
+                    }
+                    
+                    const copyTitle = document.createElement('h3');
+                    copyTitle.className = 'font-semibold mb-3 text-center';
+                    copyTitle.textContent = 'Скопируйте ссылку подписки';
+                    card.appendChild(copyTitle);
+                    
+                    const copyBtnWrapper = document.createElement('div');
+                    copyBtnWrapper.style.display = 'flex';
+                    copyBtnWrapper.style.justifyContent = 'center';
+                    card.appendChild(copyBtnWrapper);
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn btn-outline';
+                    copyBtn.innerHTML = '<svg class="icon-sm" style="margin-right:0.5rem" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Скопировать ссылку подписки';
+                    copyBtn.addEventListener('click', function() { copyToClipboard(subscriptionUrl, this); });
+                    copyBtnWrapper.appendChild(copyBtn);
+                    
+                    container.appendChild(card);
+                    
+                    if (selectedPlatform === 'tv' || selectedPlatform === 'windows') {
+                        const instructionsCard = document.createElement('div');
+                        instructionsCard.className = 'card p-6 mb-6';
+                        
+                        const instructionsTitle = document.createElement('h3');
+                        instructionsTitle.className = 'font-semibold mb-4';
+                        instructionsTitle.textContent = 'Инструкция';
+                        instructionsCard.appendChild(instructionsTitle);
+                        
+                        const instructionsList = document.createElement('div');
+                        instructionsList.className = 'flex flex-col gap-3';
+                        
+                        const setupInstructions = selectedPlatform === 'tv' ? [
+                            'Скопируйте свою подписку нажав на кнопку выше👆',
+                            'Запустите приложение V2Raytun на телевизоре и перейдите в раздел - <b>"Управление"</b>',
+                            'В открывшемся окне выберите пункт - <b>"Ручной ввод"</b>, и вставьте ранее скопированную ссылку на свою подписку с помощью приложения-пульта на телефоне',
+                            'Нажмите <b>"OK"</b> для завершения настройки и <b>включите VPN</b>'
+                        ] : [
+                            'Скопируйте свою подписку нажав на кнопку выше👆',
+                            'Откройте приложение <b>V2RayTun</b> на вашем компьютере.',
+                            'В правом верхнем углу нажмите на ➕ и выберите <b>"Импорт из буфера обмена"</b>',
+                            'Готово, можете подключаться нажав на синюю кнопку.'
+                        ];
+                        
+                        setupInstructions.forEach((instruction, index) => {
+                            const instructionDiv = document.createElement('div');
+                            instructionDiv.className = 'flex gap-3';
+                            
+                            const numberDiv = document.createElement('div');
+                            numberDiv.className = 'flex-shrink-0';
+                            numberDiv.innerHTML = `
+                                <div class="bg-primary-light text-primary rounded-full" style="width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 500;">
+                                    ${index + 1}
+                                </div>
+                            `;
+                            
+                            const textP = document.createElement('p');
+                            textP.className = 'text-sm';
+                            textP.style.paddingTop = '0.125rem';
+                            textP.innerHTML = instruction;
+                            
+                            instructionDiv.appendChild(numberDiv);
+                            instructionDiv.appendChild(textP);
+                            instructionsList.appendChild(instructionDiv);
+                        });
+                        
+                        instructionsCard.appendChild(instructionsList);
+                        container.appendChild(instructionsCard);
+                    } else if (!showQRCode) {
+                        const instructionsCard = document.createElement('div');
+                        instructionsCard.className = 'card p-6 mb-6';
+                        
+                        const instructionsTitle = document.createElement('h3');
+                        instructionsTitle.className = 'font-semibold mb-4';
+                        instructionsTitle.textContent = 'Инструкция';
+                        instructionsCard.appendChild(instructionsTitle);
+                        
+                        const instructionsList = document.createElement('div');
+                        instructionsList.className = 'flex flex-col gap-3';
+                        
+                        const instructions = selectedPlatform === 'tv' 
+                            ? [
+                                'Скопируйте свою подписку нажав на кнопку выше👆',
+                                'Запустите приложение V2Raytun на телевизоре и перейдите в раздел - <b>"Управление"</b>',
+                                'В открывшемся окне выберите пункт - <b>"Ручной ввод"</b>, и вставьте ранее скопированную ссылку на свою подписку с помощью приложения-пульта на телефоне',
+                                'Нажмите <b>"OK"</b> для завершения настройки и <b>включите VPN</b>'
+                            ]
+                            : [];
+                        
+                        if (instructions.length > 0) {
+                            instructions.forEach((instruction, index) => {
+                                const instructionDiv = document.createElement('div');
+                                instructionDiv.className = 'flex gap-3';
+                                
+                                const numberDiv = document.createElement('div');
+                                numberDiv.className = 'flex-shrink-0';
+                                numberDiv.innerHTML = `
+                                    <div class="bg-primary-light text-primary rounded-full" style="width: 1.5rem; height: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 0.875rem; font-weight: 500;">
+                                        ${index + 1}
+                                    </div>
+                                `;
+                                
+                                const textP = document.createElement('p');
+                                textP.className = 'text-sm';
+                                textP.style.paddingTop = '0.125rem';
+                                textP.innerHTML = instruction;
+                                
+                                instructionDiv.appendChild(numberDiv);
+                                instructionDiv.appendChild(textP);
+                                instructionsList.appendChild(instructionDiv);
+                            });
+                            
+                            instructionsCard.appendChild(instructionsList);
+                            container.appendChild(instructionsCard);
+                        }
+                    }
+                }
+            }
+        }
+
+        function showToast(title, description, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const iconSvg = type === 'success' 
+                ? '<svg class="toast-icon" style="color: rgb(34, 197, 94);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>'
+                : '<svg class="toast-icon" style="color: rgb(239, 68, 68);" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+            
+            toast.innerHTML = `
+                ${iconSvg}
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-description">${description}</div>
+                </div>
+                <div class="toast-timer"></div>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('removing');
+                setTimeout(() => {
+                    container.removeChild(toast);
+                }, 300);
+            }, 5000);
+        }
+
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Скопировано!', 'Ссылка подписки скопирована в буфер обмена');
+            }).catch(() => {
+                showToast('Ошибка', 'Не удалось скопировать ссылку', 'error');
+            });
+        }
+
+        let pendingDownloadUrl = '';
+
+        function showDownloadDialog(url) {
+            pendingDownloadUrl = url;
+            document.getElementById('download-dialog').classList.remove('hidden');
+        }
+
+        function hideDownloadDialog() {
+            document.getElementById('download-dialog').classList.add('hidden');
+            pendingDownloadUrl = '';
+        }
+
+        function confirmDownload() {
+            if (pendingDownloadUrl) {
+                window.open(pendingDownloadUrl, '_blank');
+                hideDownloadDialog();
+            }
+        }
+
+        function restartWizard() {
+            currentStep = 1;
+            selectedPlatform = null;
+            goToStep(1);
+        }
+
+        function formatTraffic(bytes) {
+            if (!bytes || bytes === 0) return '∞';
+            const gb = bytes / (1024 * 1024 * 1024);
+            return gb >= 1000 ? `${(gb / 1000).toFixed(1)} TB` : `${gb.toFixed(1)} GB`;
+        }
+
+        function formatExpiry(timestamp) {
+            if (!timestamp) return '∞';
+            const now = Math.floor(Date.now() / 1000);
+            const days = Math.floor((timestamp - now) / 86400);
+            return days > 0 ? `${days} дней` : 'Истёк';
+        }
+
+        function initStatus() {
+            const status = '{{ user.status.value }}';
+            const usedTraffic = {{ user.used_traffic }};
+            const dataLimit = {{ user.data_limit }};
+            const expire = {{ user.expire }};
+            
+            document.getElementById('traffic-display').textContent = `${formatTraffic(usedTraffic)} / ${formatTraffic(dataLimit)}`;
+            document.getElementById('expiry-display').textContent = formatExpiry(expire);
+            
+            const badge = document.getElementById('status-badge');
+            badge.textContent = status;
+            badge.className = 'badge badge-' + status;
+            
+            document.getElementById('status-card').classList.remove('hidden');
+        }
+
+        window.onload = () => {
+            {% if user.status.value == 'active' %}
+            initStatus();
+            initProgress();
+            initDevices();
+            {% else %}
+            document.body.innerHTML = '<div class="container text-center" style="padding-top:4rem"><h1 class="text-2xl font-semibold mb-4">Подписка неактивна</h1><p class="text-muted">Статус: {{ user.status.value }}</p></div>';
+            {% endif %}
+        };
+    </script>
+</body>
+</html>
