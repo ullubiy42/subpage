@@ -110,10 +110,10 @@
         .step-label { font-size: 0.75rem; color: var(--muted-foreground); }
         .device-card { cursor: pointer; transition: all 0.2s; }
         .device-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .icon { width: 1.5rem; height: 1.5rem; stroke: currentColor; fill: none; stroke-width: 2; }
-        .icon-sm { width: 1rem; height: 1rem; }
-        .icon-lg { width: 2rem; height: 2rem; }
-        .icon-xl { width: 4rem; height: 4rem; }
+        .icon { width: 1.5rem; height: 1.5rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-sm { width: 1rem; height: 1rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-lg { width: 2rem; height: 2rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+        .icon-xl { width: 4rem; height: 4rem; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
         .bg-primary-light { background: rgba(30, 64, 175, 0.1); }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes pulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.2); } }
@@ -141,7 +141,7 @@
         #qrcode canvas { border-radius: var(--radius); }
     </style>
 </head>
-<body data-subscription-url="{{ user.links[0] if user.links else '' }}">
+<body data-subscription-url="{{ user.subscription_url }}">
     <div class="container">
         <div id="status-card" class="card mb-6 hidden">
             <div class="grid grid-3 gap-6">
@@ -315,11 +315,11 @@
 
     <script>
         const devices = [
-            { id: 'ios', name: 'iPhone / iPad', description: 'iOS устройства', icon: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z' },
-            { id: 'android', name: 'Android', description: 'Android телефоны и планшеты', icon: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' },
-            { id: 'windows', name: 'Windows', description: 'Компьютеры на Windows', icon: 'M4 3h7v7H4zm0 11h7v7H4zm11-11h7v7h-7zm0 11h7v7h-7z' },
-            { id: 'macos', name: 'macOS', description: 'Компьютеры Mac', icon: 'M12 2l10 9-2 3H4l-2-3z' },
-            { id: 'tv', name: 'Android TV', description: 'Телевизионная приставка', icon: 'M7 2h10l5 9v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-9l5-9zm0 0 5 9m0 0 5-9m-5 9v9' }
+            { id: 'ios', name: 'iPhone / iPad', description: 'iOS устройства', icon: '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>' },
+            { id: 'android', name: 'Android', description: 'Android телефоны и планшеты', icon: '<rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line>' },
+            { id: 'windows', name: 'Windows', description: 'Компьютеры на Windows', icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>' },
+            { id: 'macos', name: 'macOS', description: 'Компьютеры Mac', icon: '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>' },
+            { id: 'tv', name: 'Android TV', description: 'Телевизионная приставка', icon: '<rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline>' }
         ];
         
         const appInfo = {
@@ -347,7 +347,7 @@
                     'Нажмите <b>"Установить"</b> и дождитесь завершения установки.',
                     'Запустите приложение после установки.'
                 ],
-                icon: '<path d="M20 7h-5V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11h20V9c0-1.1-.9-2-2-2z"/>'
+                icon: '<rect x="2" y="7" width="20" height="15" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline>'
             }
         };
 
@@ -379,7 +379,7 @@
                 <div class="card device-card" onclick="selectDevice('${d.id}')">
                     <div class="flex items-start gap-4">
                         <div class="p-3 bg-primary-light rounded-lg">
-                            <svg class="icon-lg text-primary" viewBox="0 0 24 24"><path d="${d.icon}"/></svg>
+                            <svg class="icon-lg text-primary" viewBox="0 0 24 24">${d.icon}</svg>
                         </div>
                         <div class="flex-1">
                             <h3 class="font-semibold text-lg mb-1">${d.name}</h3>
