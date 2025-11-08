@@ -141,7 +141,7 @@
         #qrcode canvas { border-radius: var(--radius); }
     </style>
 </head>
-<body data-subscription-url="{% for link in user.links %}{{ link }}{% break %}{% endfor %}">
+<body data-subscription-url="{{ user.links[0] if user.links else '' }}">
     <div class="container">
         <div id="status-card" class="card mb-6 hidden">
             <div class="grid grid-3 gap-6">
@@ -771,10 +771,10 @@
         }
 
         function initStatus() {
-            const status = '{{ user.status.value }}';
-            const usedTraffic = {{ user.used_traffic }};
-            const dataLimit = {{ user.data_limit }};
-            const expire = {{ user.expire }};
+            const status = '{{ user.status }}';
+            const usedTraffic = {{ user.used_traffic or 0 }};
+            const dataLimit = {{ user.data_limit or 0 }};
+            const expire = {{ user.expire or 0 }};
             
             document.getElementById('traffic-display').textContent = `${formatTraffic(usedTraffic)} / ${formatTraffic(dataLimit)}`;
             document.getElementById('expiry-display').textContent = formatExpiry(expire);
@@ -787,12 +787,12 @@
         }
 
         window.onload = () => {
-            {% if user.status.value == 'active' %}
+            {% if user.status == 'active' %}
             initStatus();
             initProgress();
             initDevices();
             {% else %}
-            document.body.innerHTML = '<div class="container text-center" style="padding-top:4rem"><h1 class="text-2xl font-semibold mb-4">Подписка неактивна</h1><p class="text-muted">Статус: {{ user.status.value }}</p></div>';
+            document.body.innerHTML = '<div class="container text-center" style="padding-top:4rem"><h1 class="text-2xl font-semibold mb-4">Подписка неактивна</h1><p class="text-muted">Статус: {{ user.status }}</p></div>';
             {% endif %}
         };
     </script>
