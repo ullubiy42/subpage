@@ -891,13 +891,31 @@
         }
 
         window.onload = () => {
-            {% if user.status.value == 'active' %}
-            initStatus();
+            const status = '{{ user.status.value }}';
+            
+            // Всегда показываем интерфейс устройств для тестирования
             initProgress();
             initDevices();
-            {% else %}
-            document.body.innerHTML = '<div class="container text-center" style="padding-top:4rem"><h1 class="text-2xl font-semibold mb-4">Подписка неактивна</h1><p class="text-muted">Статус: {{ user.status.value }}</p></div>';
-            {% endif %}
+            
+            // Проверяем статус только если переменная обработана Marzban
+            if (status && status !== '{{ user.status.value }}') {
+                // Marzban обработал переменную
+                if (status === 'active') {
+                    initStatus();
+                } else {
+                    // Показываем предупреждение, но оставляем интерфейс
+                    const warning = document.createElement('div');
+                    warning.className = 'card mb-6 bg-red-500/10 border-red-500/20';
+                    warning.innerHTML = `
+                        <div class="p-4 text-center">
+                            <h2 class="text-xl font-semibold mb-2 text-red-700 dark:text-red-400">Подписка неактивна</h2>
+                            <p class="text-sm text-muted">Статус: ${status}</p>
+                        </div>
+                    `;
+                    document.querySelector('.container').insertBefore(warning, document.querySelector('.container').firstChild);
+                }
+            }
+            // Если переменная не обработана (локальный просмотр), просто показываем интерфейс
         };
     </script>
 </body>
